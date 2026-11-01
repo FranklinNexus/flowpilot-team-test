@@ -1,0 +1,1 @@
+{"name": "CP FlowPilot", "short_name": "FlowPilot", "start_url": "./", "display": "standalone", "background_color": "#f5f3ee", "theme_color": "#216754", "icons": [{"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}], "scope": "./"}

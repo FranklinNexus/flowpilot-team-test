@@ -1,0 +1,12 @@
+const labels=['找到咖啡店','查看两层地图','规划跨层行程','找到无台阶方案','走完导航','继续找设施'];
+const form=document.querySelector('#feedback-form'),key='flowpilot.test.feedback.v1',status=document.querySelector('#feedback-status');
+const results=document.querySelector('#task-results');
+labels.forEach((text,i)=>{const label=document.createElement('label');label.className='task-result';const title=document.createElement('span');title.textContent=`${i+1} ${text}`;const select=document.createElement('select');select.name='task'+(i+1);select.setAttribute('aria-label',text+'结果');['未测试','独立完成','需要提示','未完成'].forEach(t=>{const option=document.createElement('option');option.textContent=t;select.append(option)});label.append(title,select);results.append(label)});
+try{const saved=JSON.parse(localStorage.getItem(key)||'{}');for(const [k,v]of Object.entries(saved)){const input=form.elements.namedItem(k);if(input&&typeof v==='string')input.value=v}}catch{}
+const values=()=>Object.fromEntries(new FormData(form));
+function build(){const v=values();return ['FlowPilot 小组测试反馈','版本：线上访客测试版 2026-11-01','测试编号：'+(v.tester||'未填写'),'设备浏览器：'+(v.device||'未填写'),'',...labels.map((t,i)=>`${i+1}. ${t}：${v['task'+(i+1)]}`),'','找目的地容易程度：'+(v.finding||'未评分'),'地图路线清晰程度：'+(v.mapClarity||'未评分'),'','最明显卡点：',v.problem||'未填写','','优先改进：',v.improvement||'未填写'].join('\n')}
+function update(){document.querySelector('#feedback-preview').value=build();try{localStorage.setItem(key,JSON.stringify(values()))}catch{}}
+form.addEventListener('input',update);form.addEventListener('change',update);form.addEventListener('submit',e=>e.preventDefault());
+document.querySelector('#copy-feedback').addEventListener('click',async()=>{update();try{await navigator.clipboard.writeText(build());status.textContent='已复制。请粘贴发给组长。'}catch{const p=document.querySelector('#feedback-preview');p.focus();p.select();status.textContent='请复制下方已选中的反馈文本，再发给组长。'}});
+document.querySelector('#download-feedback').addEventListener('click',()=>{update();const blob=new Blob(['\ufeff'+build()],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='FlowPilot_feedback.txt';a.click();URL.revokeObjectURL(url);status.textContent='反馈文本已生成，请把下载文件发给组长。'});
+document.querySelector('#clear-feedback').addEventListener('click',()=>{form.reset();try{localStorage.removeItem(key)}catch{}update();status.textContent='已清空本页记录。'});update();
